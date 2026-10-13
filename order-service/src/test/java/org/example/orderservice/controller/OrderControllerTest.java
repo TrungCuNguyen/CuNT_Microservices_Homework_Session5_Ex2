@@ -5,10 +5,12 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.example.orderservice.constant.OrderConstant;
 import org.example.orderservice.dto.request.OrderRequestDTO;
 import org.example.orderservice.dto.response.OrderResponseDTO;
+import org.example.orderservice.dto.response.ProductClientResponseDTO;
 import org.example.orderservice.exception.BadRequestException;
 import org.example.orderservice.exception.GlobalExceptionHandler;
 import org.example.orderservice.exception.InternalServerErrorException;
 import org.example.orderservice.exception.ResourceNotFoundException;
+import org.example.orderservice.exception.ServiceUnavailableException;
 import org.example.orderservice.service.OrderService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +69,6 @@ public class OrderControllerTest {
 
     @Test
     void testCreateOrder_QuantityLessThanOrEqualToZero_Returns400() throws Exception {
-        // Yêu cầu: Nếu khách hàng truyền vào quantity <= 0, trả về lỗi 400 thông qua ApiResponseError
         OrderRequestDTO request = OrderRequestDTO.builder()
                 .customerId(1L)
                 .productId(2L)
@@ -89,7 +90,6 @@ public class OrderControllerTest {
 
     @Test
     void testCreateOrder_DatabaseSaveFailure_Returns500() throws Exception {
-        // Yêu cầu: Nếu lưu vào DB thất bại, trả về lỗi 500 Internal Server Error cũng với định dạng ApiResponseError
         OrderRequestDTO request = OrderRequestDTO.builder()
                 .customerId(1L)
                 .productId(2L)
@@ -119,6 +119,38 @@ public class OrderControllerTest {
                 .andExpect(jsonPath("$.status").value(404))
                 .andExpect(jsonPath("$.error").value("Not Found"))
                 .andExpect(jsonPath("$.message").value("Đơn hàng với ID 99 không tồn tại!"))
+                .andExpect(jsonPath("$.timestamp").exists());
+    }
+
+    @Test
+    void testGetProductFromProductService_Success() throws Exception {
+        ProductClientResponseDTO product = ProductClientResponseDTO.builder()
+                .id(1L)
+                .name("Iphone 17")
+                .price(123456.0)
+                .stockQuantity(50)
+                .build();
+
+        when(orderService.getProductFromProductService(1L)).thenReturn(product);
+
+        mockMvc.perform(get("/api/v1/orders/getProduct/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.name").value("Iphone 17"))
+                .andExpect(jsonPath("$.price").value(123456.0))
+                .andExpect(jsonPath("$.stockQuantity").value(50));
+    }
+
+    @Test
+    void testGetProductFromProductService_ServiceUnavailable_Returns503() throws Exception {
+        when(orderService.getProductFromProductService(1L))
+                .thenThrow(new ServiceUnavailableException("PRODUCT-SERVICE hiện không khả dụng (Không tìm thấy instance nào)"));
+
+        mockMvc.perform(get("/api/v1/orders/getProduct/1"))
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.status").value(503))
+                .andExpect(jsonPath("$.error").value("Service Unavailable"))
+                .andExpect(jsonPath("$.message").value("PRODUCT-SERVICE hiện không khả dụng (Không tìm thấy instance nào)"))
                 .andExpect(jsonPath("$.timestamp").exists());
     }
 }

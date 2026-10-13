@@ -6,12 +6,37 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(ServiceUnavailableException.class)
+    public ResponseEntity<ApiResponseError> handleServiceUnavailableException(ServiceUnavailableException ex) {
+        ApiResponseError error = ApiResponseError.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.SERVICE_UNAVAILABLE.value())
+                .error(HttpStatus.SERVICE_UNAVAILABLE.getReasonPhrase())
+                .message(ex.getMessage())
+                .build();
+        return new ResponseEntity<>(error, HttpStatus.SERVICE_UNAVAILABLE);
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ApiResponseError> handleResponseStatusException(ResponseStatusException ex) {
+        HttpStatus status = HttpStatus.resolve(ex.getStatusCode().value());
+        String reason = status != null ? status.getReasonPhrase() : "Error";
+        ApiResponseError error = ApiResponseError.builder()
+                .timestamp(LocalDateTime.now())
+                .status(ex.getStatusCode().value())
+                .error(reason)
+                .message(ex.getReason() != null ? ex.getReason() : ex.getMessage())
+                .build();
+        return new ResponseEntity<>(error, ex.getStatusCode());
+    }
 
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ApiResponseError> handleBadRequestException(BadRequestException ex) {

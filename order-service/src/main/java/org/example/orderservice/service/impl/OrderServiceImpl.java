@@ -10,9 +10,11 @@ import org.example.orderservice.entity.Order;
 import org.example.orderservice.exception.BadRequestException;
 import org.example.orderservice.exception.InternalServerErrorException;
 import org.example.orderservice.exception.ResourceNotFoundException;
+import org.example.orderservice.exception.ServiceUnavailableException;
 import org.example.orderservice.repository.OrderRepository;
 import org.example.orderservice.service.OrderService;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -27,9 +29,49 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
     private final RestClient restClient;
+    private final DiscoveryClient discoveryClient;
 
-    @Value("${services.product.url:http://localhost:8082/api/v1/products}")
-    private String productServiceUrl;
+    @Override
+    public ProductClientResponseDTO getProductFromProductService(Long productId) {
+        // BƯỚC A: Hỏi Eureka lấy danh sách các máy chủ đang chạy ProductService
+        // Lưu ý: Tên service lấy trong file application.properties
+        List<ServiceInstance> instances = discoveryClient.getInstances("product-service");
+        if (instances == null || instances.isEmpty()) {
+            instances = discoveryClient.getInstances("PRODUCT-SERVICE");
+        }
+
+        // BƯỚC B: Xử lý lỗi (Theo yêu cầu bài tập: Trả về 503 nếu rỗng)
+        if (instances == null || instances.isEmpty()) {
+            throw new ServiceUnavailableException("PRODUCT-SERVICE hiện không khả dụng (Không tìm thấy instance nào)");
+        }
+
+        // BƯỚC C: Lấy Instance đầu tiên trong danh sách (Tương lai bạn có thể viết logic random để cân bằng tải)
+        ServiceInstance productInstance = instances.get(0);
+
+        // BƯỚC D: Lấy URL gốc (Ví dụ: http://localhost:8082 hoặc http://localhost:9090) từ instance
+        String baseUrl = productInstance.getUri().toString();
+
+        // BƯỚC E: Nối chuỗi để tạo ra API URL hoàn chỉnh (Ví dụ: http://localhost:9090/api/v1/products/123)
+        String targetUrl = baseUrl + "/api/v1/products/" + productId;
+
+        // BƯỚC F: Thực hiện gọi API lấy về sản phẩm
+        try {
+            ProductClientResponseDTO product = restClient.get()
+                    .uri(targetUrl)
+                    .retrieve()
+                    .body(ProductClientResponseDTO.class);
+
+            if (product == null) {
+                throw new ResourceNotFoundException("Không tìm thấy sản phẩm với ID " + productId);
+            }
+            return product;
+        } catch (ResourceNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Lỗi khi kết nối tới PRODUCT-SERVICE tại {}: {}", targetUrl, e.getMessage());
+            throw new ServiceUnavailableException("PRODUCT-SERVICE hiện không khả dụng (Không thể kết nối)");
+        }
+    }
 
     @Override
     public OrderResponseDTO createOrder(OrderRequestDTO requestDTO) {
@@ -37,23 +79,13 @@ public class OrderServiceImpl implements OrderService {
             throw new BadRequestException(OrderConstant.INVALID_QUANTITY);
         }
 
-        // Lấy giá từ Product Service (hoặc giả lập nếu Product Service chưa khởi chạy)
-        Double unitPrice = 100.0;
-        try {
-            ProductClientResponseDTO product = restClient.get()
-                    .uri(productServiceUrl + "/" + requestDTO.getProductId())
-                    .retrieve()
-                    .body(ProductClientResponseDTO.class);
-
-            if (product != null && product.getPrice() != null) {
-                unitPrice = product.getPrice();
-                log.info("Lấy giá thành công từ Product Service: {} cho productId={}", unitPrice, requestDTO.getProductId());
-            }
-        } catch (Exception e) {
-            log.warn("Không kết nối được Product Service ({}), sử dụng đơn giá giả lập mặc định: {}", productServiceUrl, unitPrice);
+        // Lấy thông tin sản phẩm và giá qua DiscoveryClient
+        ProductClientResponseDTO product = getProductFromProductService(requestDTO.getProductId());
+        if (product.getPrice() == null) {
+            throw new BadRequestException("Giá sản phẩm không hợp lệ!");
         }
 
-        Double totalAmount = unitPrice * requestDTO.getQuantity();
+        Double totalAmount = product.getPrice() * requestDTO.getQuantity();
 
         try {
             Order order = Order.builder()

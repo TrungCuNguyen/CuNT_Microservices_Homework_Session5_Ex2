@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.orderservice.dto.request.OrderRequestDTO;
 import org.example.orderservice.dto.response.OrderResponseDTO;
+import org.example.orderservice.dto.response.ProductClientResponseDTO;
 import org.example.orderservice.service.OrderService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,5 +34,10 @@ public class OrderController {
     @GetMapping
     public ResponseEntity<List<OrderResponseDTO>> getAllOrders() {
         return ResponseEntity.ok(orderService.getAllOrders());
+    }
+
+    @GetMapping("/getProduct/{productId}")
+    public ResponseEntity<ProductClientResponseDTO> getProductFromProductService(@PathVariable Long productId) {
+        return ResponseEntity.ok(orderService.getProductFromProductService(productId));
     }
 }

@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="org.example.orderservice.controller.OrderControllerTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-13T15:21:45.599Z" hostname="DESKTOP-M4L6TBH" time="7.445">
+<testsuite name="org.example.orderservice.controller.OrderControllerTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-13T15:34:15.222Z" hostname="DESKTOP-M4L6TBH" time="7.92">
   <properties/>
-  <testcase name="testCreateOrder_DatabaseSaveFailure_Returns500()" classname="org.example.orderservice.controller.OrderControllerTest" time="0.721"/>
-  <testcase name="testCreateOrder_QuantityLessThanOrEqualToZero_Returns400()" classname="org.example.orderservice.controller.OrderControllerTest" time="0.043"/>
-  <testcase name="testGetOrderById_NotFound()" classname="org.example.orderservice.controller.OrderControllerTest" time="0.03"/>
-  <testcase name="testCreateOrder_Success()" classname="org.example.orderservice.controller.OrderControllerTest" time="0.041"/>
-  <system-out><![CDATA[22:21:45.963 [Test worker] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [org.example.orderservice.controller.OrderControllerTest]: OrderControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
-22:21:46.247 [Test worker] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration org.example.orderservice.OrderServiceApplication for test class org.example.orderservice.controller.OrderControllerTest
-22:21:46.258 [Test worker] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [org.example.orderservice.controller.OrderControllerTest]: OrderControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
-22:21:46.279 [Test worker] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration org.example.orderservice.OrderServiceApplication for test class org.example.orderservice.controller.OrderControllerTest
+  <testcase name="testCreateOrder_DatabaseSaveFailure_Returns500()" classname="org.example.orderservice.controller.OrderControllerTest" time="0.856"/>
+  <testcase name="testCreateOrder_QuantityLessThanOrEqualToZero_Returns400()" classname="org.example.orderservice.controller.OrderControllerTest" time="0.046"/>
+  <testcase name="testGetProductFromProductService_Success()" classname="org.example.orderservice.controller.OrderControllerTest" time="0.055"/>
+  <testcase name="testGetProductFromProductService_ServiceUnavailable_Returns503()" classname="org.example.orderservice.controller.OrderControllerTest" time="0.027"/>
+  <testcase name="testGetOrderById_NotFound()" classname="org.example.orderservice.controller.OrderControllerTest" time="0.023"/>
+  <testcase name="testCreateOrder_Success()" classname="org.example.orderservice.controller.OrderControllerTest" time="0.028"/>
+  <system-out><![CDATA[22:34:15.581 [Test worker] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [org.example.orderservice.controller.OrderControllerTest]: OrderControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+22:34:15.842 [Test worker] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration org.example.orderservice.OrderServiceApplication for test class org.example.orderservice.controller.OrderControllerTest
+22:34:15.848 [Test worker] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [org.example.orderservice.controller.OrderControllerTest]: OrderControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+22:34:15.874 [Test worker] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration org.example.orderservice.OrderServiceApplication for test class org.example.orderservice.controller.OrderControllerTest
 
   .   ____          _            __ _ _
  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
@@ -19,12 +21,12 @@
 
  :: Spring Boot ::                (v4.1.1)
 
-2026-10-13T22:21:47.873+07:00  INFO 2400 --- [order-service] [    Test worker] o.e.o.controller.OrderControllerTest     : Starting OrderControllerTest using Java 17.0.20.1 with PID 2400 (started by ADM in E:\Dev\JAVA\ex_ss4_micro\order-service)
-2026-10-13T22:21:47.875+07:00  INFO 2400 --- [order-service] [    Test worker] o.e.o.controller.OrderControllerTest     : No active profile set, falling back to 1 default profile: "default"
-2026-10-13T22:21:52.063+07:00  INFO 2400 --- [order-service] [    Test worker] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
-2026-10-13T22:21:52.064+07:00  INFO 2400 --- [order-service] [    Test worker] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
-2026-10-13T22:21:52.072+07:00  INFO 2400 --- [order-service] [    Test worker] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 4 ms
-2026-10-13T22:21:52.159+07:00  INFO 2400 --- [order-service] [    Test worker] o.e.o.controller.OrderControllerTest     : Started OrderControllerTest in 5.246 seconds (process running for 8.524)
+2026-10-13T22:34:17.591+07:00  INFO 1216 --- [order-service] [    Test worker] o.e.o.controller.OrderControllerTest     : Starting OrderControllerTest using Java 17.0.20.1 with PID 1216 (started by ADM in E:\Dev\JAVA\ex_ss4_micro\order-service)
+2026-10-13T22:34:17.594+07:00  INFO 1216 --- [order-service] [    Test worker] o.e.o.controller.OrderControllerTest     : No active profile set, falling back to 1 default profile: "default"
+2026-10-13T22:34:21.918+07:00  INFO 1216 --- [order-service] [    Test worker] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-10-13T22:34:21.919+07:00  INFO 1216 --- [order-service] [    Test worker] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-10-13T22:34:21.927+07:00  INFO 1216 --- [order-service] [    Test worker] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 4 ms
+2026-10-13T22:34:22.039+07:00  INFO 1216 --- [order-service] [    Test worker] o.e.o.controller.OrderControllerTest     : Started OrderControllerTest in 5.466 seconds (process running for 8.747)
 ]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>
