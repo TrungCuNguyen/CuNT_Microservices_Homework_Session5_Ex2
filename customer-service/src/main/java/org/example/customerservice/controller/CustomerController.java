@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/customers")
+@RequestMapping({"/api/v1/customers", "/api/v1/auth"})
 @RequiredArgsConstructor
 public class CustomerController {
 
@@ -25,7 +25,7 @@ public class CustomerController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @PutMapping("/login")
+    @RequestMapping(value = "/login", method = {RequestMethod.POST, RequestMethod.PUT})
     public ResponseEntity<CustomerResponseDTO> login(@Valid @RequestBody LoginRequestDTO loginDTO) {
         CustomerResponseDTO response = customerService.login(loginDTO);
         return ResponseEntity.ok(response);
